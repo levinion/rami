@@ -1,0 +1,4 @@
+[workspace]
+members = ["rami-core", "rami-cli"]
+default-members = ["rami-cli"]
+resolver = "2"

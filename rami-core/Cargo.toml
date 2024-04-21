@@ -1,0 +1,11 @@
+[package]
+name = "rami-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.82"
+crossbeam = "0.8.4"
+reqwest = "0.12.4"
+tokio = { version = "1.37.0", features = ["full"] }
+indicatif = "0.17.8"
