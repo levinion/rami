@@ -101,6 +101,7 @@ impl Downloader {
             Ok::<(), anyhow::Error>(())
         })?;
         wg.wait();
+        pb.finish();
         Ok(pieces)
     }
 
