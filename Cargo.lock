@@ -914,7 +914,7 @@ dependencies = [
 
 [[package]]
 name = "rami-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -925,7 +925,7 @@ dependencies = [
 
 [[package]]
 name = "rami-core"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "crossbeam",
@@ -937,8 +937,8 @@ dependencies = [
 
 [[package]]
 name = "rbittorrent"
-version = "0.1.0"
-source = "git+https://github.com/levinion/rbittorrent#2b38a1e9af41e3de5ab8c677c919a49f4235eac0"
+version = "0.1.2"
+source = "git+https://github.com/levinion/rbittorrent?rev=2125a91#2125a91b205e1727cccc874f55a96622e7fa3ac9"
 dependencies = [
  "anyhow",
  "bytes",

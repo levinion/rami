@@ -62,8 +62,10 @@ impl Downloader<HttpDownloadState> {
         Ok(name)
     }
 
-    fn piece_name(&self, i: usize) -> Result<String> {
-        Ok(format!("{}-p{}.rami", self.filename()?, i))
+    fn piece_name(&self, i: usize) -> Result<PathBuf> {
+        let dir = PathBuf::from(self.filename()?);
+        let name = dir.join(format!("{}-p{}.rami", self.filename()?, i));
+        Ok(name)
     }
 
     fn create_progress_bar(&self, total: u64) -> ProgressBar {
@@ -73,7 +75,7 @@ impl Downloader<HttpDownloadState> {
         pb
     }
 
-    async fn download_pieces(&self) -> Result<Vec<String>> {
+    async fn download_pieces(&self) -> Result<Vec<PathBuf>> {
         let content_length = self.get_content_length().await?;
         let wg = WaitGroup::new();
         let mut pieces = Vec::with_capacity(self.opt.threads);
@@ -109,7 +111,7 @@ impl Downloader<HttpDownloadState> {
         Ok(pieces)
     }
 
-    fn concat_pieces(&self, pieces: Vec<String>) -> Result<()> {
+    fn concat_pieces(&self, pieces: Vec<PathBuf>) -> Result<()> {
         let mut file = File::create(self.filename()?)?;
         pieces.into_iter().try_for_each(|name| {
             let mut piece = File::open(&name)?;
