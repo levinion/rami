@@ -4,6 +4,6 @@ mod bittorrent;
 mod http;
 
 pub struct Downloader<T> {
-    url: Arc<String>,
+    src: Arc<String>,
     opt: T,
 }

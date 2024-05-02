@@ -1,4 +1,9 @@
-use std::{fs::File, io::Write, path::PathBuf, sync::Arc};
+use std::{
+    fs::{create_dir_all, File},
+    io::Write,
+    path::PathBuf,
+    sync::Arc,
+};
 
 use anyhow::{Context, Result};
 use crossbeam::sync::WaitGroup;
@@ -12,13 +17,13 @@ pub struct HttpDownloadState {
 }
 
 impl Downloader<HttpDownloadState> {
-    pub fn http_client(url: &str, user_agent: &str, threads: usize) -> Self {
+    pub fn http_client(src: &str, user_agent: &str, threads: usize) -> Self {
         let opt = HttpDownloadState {
             user_agent: Arc::new(user_agent.into()),
             threads,
         };
         Self {
-            url: Arc::new(url.into()),
+            src: Arc::new(src.into()),
             opt,
         }
     }
@@ -27,7 +32,7 @@ impl Downloader<HttpDownloadState> {
         let res = reqwest::ClientBuilder::new()
             .user_agent(&*self.opt.user_agent)
             .build()?
-            .head(&*self.url)
+            .head(&*self.src)
             .send()
             .await?;
         let content_length = res
@@ -53,7 +58,7 @@ impl Downloader<HttpDownloadState> {
     }
 
     fn filename(&self) -> Result<String> {
-        let path = PathBuf::from(&*self.url);
+        let path = PathBuf::from(&*self.src);
         let name = path
             .file_name()
             .context("cannot infer file name from url")?
@@ -63,8 +68,8 @@ impl Downloader<HttpDownloadState> {
     }
 
     fn piece_name(&self, i: usize) -> Result<PathBuf> {
-        let dir = PathBuf::from(self.filename()?);
-        let name = dir.join(format!("{}-p{}.rami", self.filename()?, i));
+        let dir = PathBuf::from(format!("{}.cache", self.filename()?));
+        let name = dir.join(format!("{}-cache-{}", self.filename()?, i));
         Ok(name)
     }
 
@@ -80,9 +85,13 @@ impl Downloader<HttpDownloadState> {
         let wg = WaitGroup::new();
         let mut pieces = Vec::with_capacity(self.opt.threads);
         let pb = self.create_progress_bar(content_length);
+
+        let dir = PathBuf::from(format!("{}.cache", self.filename()?));
+        create_dir_all(dir)?;
+
         (0..self.opt.threads).try_for_each(|i| {
             let range = self.range_of_bytes(i, content_length);
-            let url = self.url.clone();
+            let url = self.src.clone();
             let user_agent = self.opt.user_agent.clone();
             let name = self.piece_name(i)?;
             pieces.push(name.clone());
@@ -114,11 +123,14 @@ impl Downloader<HttpDownloadState> {
     fn concat_pieces(&self, pieces: Vec<PathBuf>) -> Result<()> {
         let mut file = File::create(self.filename()?)?;
         pieces.into_iter().try_for_each(|name| {
-            let mut piece = File::open(&name)?;
+            let mut piece = File::open(name)?;
             std::io::copy(&mut piece, &mut file)?;
-            std::fs::remove_file(&name)?;
-            Ok(())
-        })
+            anyhow::Ok(())
+        })?;
+
+        let dir = PathBuf::from(format!("{}.cache", self.filename()?));
+        std::fs::remove_dir_all(dir)?;
+        Ok(())
     }
 
     pub async fn download(&self) -> Result<()> {

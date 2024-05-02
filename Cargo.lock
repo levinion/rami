@@ -697,6 +697,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
 
 [[package]]
+name = "magnet-url"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac3b4c4004e88aca00cc0c60782e5642c8fc628deca19e530ce58aa76e737d74"
+dependencies = [
+ "lazy_static",
+ "regex",
+]
+
+[[package]]
 name = "memchr"
 version = "2.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -914,7 +924,7 @@ dependencies = [
 
 [[package]]
 name = "rami-cli"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -925,7 +935,7 @@ dependencies = [
 
 [[package]]
 name = "rami-core"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "anyhow",
  "crossbeam",
@@ -937,8 +947,8 @@ dependencies = [
 
 [[package]]
 name = "rbittorrent"
-version = "0.1.2"
-source = "git+https://github.com/levinion/rbittorrent?rev=2125a91#2125a91b205e1727cccc874f55a96622e7fa3ac9"
+version = "0.1.3"
+source = "git+https://github.com/levinion/rbittorrent?rev=3baed6c#3baed6cd8ce0a978355604153dddaf53596b4795"
 dependencies = [
  "anyhow",
  "bytes",
@@ -946,6 +956,7 @@ dependencies = [
  "env_logger",
  "indicatif",
  "log",
+ "magnet-url",
  "reqwest",
  "serde",
  "serde_bencode",

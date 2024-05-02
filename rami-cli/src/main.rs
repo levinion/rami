@@ -1,29 +1,31 @@
 use anyhow::Result;
 use clap::Parser;
-use cli::Cli;
-use download::{match_protocol, Protocol};
+use cli::{Cli, Command};
 use rami_core::Downloader;
 
 mod cli;
-mod download;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
-    let threads = if cli.threads == 0 {
-        num_cpus::get() / 2
-    } else {
-        cli.threads
-    };
-    match match_protocol(&cli.source)? {
-        Protocol::Http => {
-            let downloader = Downloader::http_client(&cli.source, &cli.agent, threads);
+    match cli.command {
+        Command::Http {
+            threads,
+            agent,
+            source,
+        } => {
+            let threads = if threads == 0 {
+                num_cpus::get() / 2
+            } else {
+                threads
+            };
+            let downloader = Downloader::http_client(&source, &agent, threads);
             downloader.download().await?;
         }
-        Protocol::Bittorrent => {
-            let downloader = Downloader::bittorrent_client(&cli.source);
+        Command::Torrent { source } => {
+            let downloader = Downloader::bittorrent_client(&source);
             downloader.download().await?;
         }
-    };
+    }
     Ok(())
 }
